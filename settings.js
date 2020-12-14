@@ -21,12 +21,20 @@ const createSkeleton = () => {
     }, null, 2));
 };
 
-const getSettings = () => {
+const loadSettings = () => {
     return JSON.parse(fs.readFileSync(settingsPath));
 };
 
-export default {
-    exist: settingsExist,
-    load: getSettings,
-    createSkeleton
-};
+console.log("Loading settings...");
+
+if (!settingsExist()) {
+    console.warn("No settings file found, creating skeleton...");
+    createSkeleton();
+    console.log("Please change the settings skeleton to your liking and restart the app.");
+    process.exit();
+}
+
+const settings = loadSettings();
+console.log("Successfully loaded settings");
+
+export default settings;
