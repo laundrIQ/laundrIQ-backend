@@ -15,7 +15,8 @@ const init = (app, db) => {
 
     app.get('/machines', async (req, res) => {
         const machinesRes = await db.query('show tag values with key=machine');
-        let response = {machines: []};
+        const rooms = {};
+        let response = {rooms: []};
         const promises = [];
         for (let machine of machinesRes) {
             promises.push((async () => {
@@ -28,7 +29,13 @@ const init = (app, db) => {
                     startTime = times.start;
                     projectedEndTime = times.projectedEnd;
                 }
-                response.machines.push({
+                if (!rooms.hasOwnProperty(room)) {
+                    rooms[room] = {
+                        name: room,
+                        machines: []
+                    };
+                }
+                rooms[room].machines.push({
                     room: room,
                     name: machine.value,
                     isBusy,
@@ -38,6 +45,18 @@ const init = (app, db) => {
             })());
         }
         await Promise.all(promises);
+        for (const r in rooms) {
+            rooms[r].machines = rooms[r].machines.sort((a, b) => {
+                if (a.name < b.name) return -1;
+                if (a.name > b.name) return 1;
+                return 0;
+            });
+        }
+        response.rooms = Object.values(rooms).sort((a, b) => {
+            if (a.name < b.name) return -1;
+            if (a.name > b.name) return 1;
+            return 0;
+        });
         res.json(response);
     });
 };
