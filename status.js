@@ -23,11 +23,11 @@ const init = (app, db) => {
                 const room = await usage.getMachineRoom(machine.value);
                 const isBusy = await usage.isMachineBusy(machine.value);
                 let startTime = null;
-                let projectedEndTime = null;
+                let endTime = null;
                 if (isBusy) {
                     const times = await usage.getCurrentUsageStats(machine.value);
                     startTime = times.start;
-                    projectedEndTime = times.projectedEnd;
+                    endTime = times.end;
                 }
                 if (!rooms.hasOwnProperty(room)) {
                     rooms[room] = {
@@ -36,11 +36,11 @@ const init = (app, db) => {
                     };
                 }
                 rooms[room].machines.push({
-                    room: room,
+                    room,
                     name: machine.value,
                     isBusy,
                     startTime,
-                    projectedEndTime
+                    endTime
                 });
             })());
         }

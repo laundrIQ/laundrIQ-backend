@@ -8,7 +8,7 @@ import cors from "cors";
 
 const app = express();
 app.use(bodyParser.json());
-app.use(cors())
+app.use(cors());
 
 relay.init(app, db);
 status.init(app, db);

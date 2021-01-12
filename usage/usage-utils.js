@@ -1,12 +1,13 @@
 import moment from "moment";
 import db from "../database.js";
 
-const MINIMUM_MEAN_ACTIVITY = 0.2;
+const MINIMUM_MEAN_ACTIVITY = 0.15;
 const DEFAULT_WASH_LENGTH = 70;
+const WASH_LENGTH_RANGE = [40, 60]
 
 const isMachineBusy = async (machineName) => {
-    const result = await db.query(`SELECT activity FROM "washing_activity" WHERE machine='${machineName}' ORDER BY DESC LIMIT 2`);
-    return ((result[0].activity + result[1].activity) / 2) > MINIMUM_MEAN_ACTIVITY;
+    const result = await db.query(`SELECT moving_average("activity", 4) FROM "washing_activity" WHERE machine='${machineName}' ORDER BY DESC LIMIT 2`);
+    return ((result[0].moving_average + result[1].moving_average) / 2) > MINIMUM_MEAN_ACTIVITY;
 };
 
 const getMachineRoom = async (machineName) => {
@@ -26,13 +27,15 @@ const getCurrentUsageStats = async (machineName) => {
     while (queryRes[i].moving_average > 0) {
         i++;
     }
+    // now go forwards until we find activity
     while (queryRes[i].moving_average === 0) {
         i++;
     }
     const start = queryRes[i].time.getTime();
-    const projectedEnd = moment(start).add(DEFAULT_WASH_LENGTH, 'minute').valueOf();
+    const earliestEnd = moment(start).add(WASH_LENGTH_RANGE[0], 'minute').valueOf();
+    const latestEnd = moment(start).add(WASH_LENGTH_RANGE[1], 'minute').valueOf();
 
-    return {start, projectedEnd};
+    return {start, end: {earliest: earliestEnd, latest: latestEnd}};
 };
 
 export default {
