@@ -22,13 +22,18 @@ const getMachineRoom = async (machineName) => {
  */
 const getCurrentUsageStats = async (machineName) => {
     const queryRes = await db.query(`SELECT moving_average("activity", 4) FROM "washing_activity" WHERE machine='${machineName}' AND time >= now() - 80m`);
+
+    if (queryRes.length === 0) {
+        return {start: null, end: null};
+    }
+
     let i = 0;
     // if we went too far back, find a point where machine is idle
-    while (queryRes[i].moving_average > 0) {
+    while (i < queryRes.length && queryRes[i].moving_average > 0) {
         i++;
     }
     // now go forwards until we find activity
-    while (queryRes[i].moving_average === 0) {
+    while (i < queryRes.length && queryRes[i].moving_average === 0) {
         i++;
     }
     const start = queryRes[i].time.getTime();
