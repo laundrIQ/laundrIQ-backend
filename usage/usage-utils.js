@@ -29,13 +29,18 @@ const getCurrentUsageStats = async (machineName) => {
 
     let i = 0;
     // if we went too far back, find a point where machine is idle
-    while (i < queryRes.length && queryRes[i].moving_average > 0) {
+    while (i < queryRes.length && queryRes[i].moving_average > 0.01) {
         i++;
     }
     // now go forwards until we find activity
-    while (i < queryRes.length && queryRes[i].moving_average === 0) {
+    while (i < queryRes.length && queryRes[i].moving_average <= 0.01) {
         i++;
     }
+
+    if (i >= queryRes.length) {
+        i = queryRes.length - 1;
+    }
+
     const start = queryRes[i].time.getTime();
     const earliestEnd = moment(start).add(WASH_LENGTH_RANGE[0], 'minute').valueOf();
     const latestEnd = moment(start).add(WASH_LENGTH_RANGE[1], 'minute').valueOf();
