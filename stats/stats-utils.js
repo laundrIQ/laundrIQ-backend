@@ -5,7 +5,7 @@ import usage from "../usage/usage-utils.js";
 
 const STAT_WEEKS = 12;
 const STAT_UNIT_BLOCK = 2; // in hours
-const STAT_OCCUPATION_FACTOR = 2; // each activity value is multiplied by this
+const STAT_OCCUPATION_FACTOR = 1.5; // each activity value is multiplied by this
                                   // so if = 2, then 50% active minutes = 100% occupation activity in the graph
 
 const STAT_UNIT_AMOUNT = Math.round(24 / STAT_UNIT_BLOCK); // amount of results
