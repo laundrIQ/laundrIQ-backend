@@ -1,5 +1,6 @@
 import usage from "./usage/usage-utils.js";
 
+//TODO: add error handling
 
 const init = (app, db) => {
     app.get('/room-names', async (req, res) => {

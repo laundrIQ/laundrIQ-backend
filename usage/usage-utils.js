@@ -3,7 +3,7 @@ import db from "../database.js";
 
 const MINIMUM_MEAN_ACTIVITY = 0.15;
 const DEFAULT_WASH_LENGTH = 70;
-const WASH_LENGTH_RANGE = [40, 60]
+const WASH_LENGTH_RANGE = [40, 60];
 
 const isMachineBusy = async (machineName) => {
     const result = await db.query(`SELECT moving_average("activity", 4) FROM "washing_activity" WHERE machine='${machineName}' ORDER BY DESC LIMIT 2`);
@@ -11,7 +11,7 @@ const isMachineBusy = async (machineName) => {
 };
 
 const getMachineRoom = async (machineName) => {
-    const result = await db.query(`SELECT * FROM "washing_activity" WHERE machine='${machineName}' LIMIT 1`);
+    const result = await db.query(`SELECT LAST(*) FROM "washing_activity" WHERE machine='${machineName}' GROUP BY "room"`);
     return result[0].room;
 };
 
@@ -52,4 +52,4 @@ export default {
     isMachineBusy,
     getMachineRoom,
     getCurrentUsageStats
-}
+};
