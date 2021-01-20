@@ -16,17 +16,18 @@ const init = (app, db) => {
 
     app.get('/machines', async (req, res) => {
         const machinesRes = await db.query('show tag values with key=machine');
+        const uniqueMachines = new Set(machinesRes.map(m => m.value));
         const rooms = {};
         let response = {rooms: []};
         const promises = [];
-        for (let machine of machinesRes) {
+        for (let machine of uniqueMachines) {
             promises.push((async () => {
-                const room = await usage.getMachineRoom(machine.value);
-                const isBusy = await usage.isMachineBusy(machine.value);
+                const room = await usage.getMachineRoom(machine);
+                const isBusy = await usage.isMachineBusy(machine);
                 let startTime = null;
                 let endTime = null;
                 if (isBusy) {
-                    const times = await usage.getCurrentUsageStats(machine.value);
+                    const times = await usage.getCurrentUsageStats(machine);
                     startTime = times.start;
                     endTime = times.end;
                 }
@@ -38,7 +39,7 @@ const init = (app, db) => {
                 }
                 rooms[room].machines.push({
                     room,
-                    name: machine.value,
+                    name: machine,
                     isBusy,
                     startTime,
                     endTime
