@@ -33,7 +33,7 @@ const getCurrentUsageStats = async (machineName) => {
         i++;
     }
     // now go forwards until we find activity
-    while (i < queryRes.length && queryRes[i].moving_average <= 0.01) {
+    while (i < queryRes.length && queryRes[i].moving_average < MINIMUM_MEAN_ACTIVITY) {
         i++;
     }
 
