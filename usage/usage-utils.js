@@ -7,12 +7,21 @@ const WASH_LENGTH_RANGE = [40, 60];
 
 const isMachineBusy = async (machineName) => {
     const result = await db.query(`SELECT moving_average("activity", 4) FROM "washing_activity" WHERE machine='${machineName}' ORDER BY DESC LIMIT 2`);
+    // machine is down and hasn't sent updates in a while
+    if (moment().subtract(5, 'minute').isAfter(result[0].time)) {
+        return false;
+    }
     return ((result[0].moving_average + result[1].moving_average) / 2) > MINIMUM_MEAN_ACTIVITY;
 };
 
 const getMachineRoom = async (machineName) => {
     const result = await db.query(`SELECT LAST(*) FROM "washing_activity" WHERE machine='${machineName}' GROUP BY "room"`);
     return result[0].room;
+};
+
+const getLastUsed = async (machineName) => {
+    const result = await db.query(`SELECT * FROM (SELECT moving_average("activity", 4) FROM "washing_activity" WHERE machine='${machineName}') WHERE moving_average > 0.2 ORDER BY DESC LIMIT 1`);
+    return result.length ? result[0].time : null;
 };
 
 /**
@@ -50,6 +59,7 @@ const getCurrentUsageStats = async (machineName) => {
 
 export default {
     isMachineBusy,
+    getLastUsed,
     getMachineRoom,
     getCurrentUsageStats
 };

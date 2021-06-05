@@ -24,12 +24,16 @@ const init = (app, db) => {
             promises.push((async () => {
                 const room = await usage.getMachineRoom(machine);
                 const isBusy = await usage.isMachineBusy(machine);
+                let lastUsed = null;
                 let startTime = null;
                 let endTime = null;
                 if (isBusy) {
                     const times = await usage.getCurrentUsageStats(machine);
                     startTime = times.start;
                     endTime = times.end;
+                }
+                else {
+                    lastUsed = await usage.getLastUsed(machine);
                 }
                 if (!rooms.hasOwnProperty(room)) {
                     rooms[room] = {
@@ -41,6 +45,7 @@ const init = (app, db) => {
                     room,
                     name: machine,
                     isBusy,
+                    lastUsed,
                     startTime,
                     endTime
                 });
