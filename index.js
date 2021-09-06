@@ -5,6 +5,7 @@ import db from "./database.js";
 import relay from "./relay/relay.js";
 import status from "./status.js";
 import statistics from "./statistics.js";
+import notifications from "./notifications.js";
 import cors from "cors";
 import moment from "moment";
 
@@ -26,6 +27,7 @@ app.use(cors());
 relay.init(app, db);
 status.init(app, db);
 statistics.init(app, db);
+notifications.init(app, db);
 
 app.get('/', (req, res) => {
     res.send("laundrIQ backend is running!");

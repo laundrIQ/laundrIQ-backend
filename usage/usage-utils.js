@@ -5,6 +5,11 @@ const MINIMUM_MEAN_ACTIVITY = 0.15;
 const DEFAULT_WASH_LENGTH = 70;
 const WASH_LENGTH_RANGE = [40, 60];
 
+const getUniqueMachines = async () => {
+    const machinesRes = await db.query('show tag values with key=machine');
+    return new Set(machinesRes.map(m => m.value))
+};
+
 const isMachineBusy = async (machineName) => {
     const result = await db.query(`SELECT moving_average("activity", 4) FROM "washing_activity" WHERE machine='${machineName}' ORDER BY DESC LIMIT 2`);
     // machine is down and hasn't sent updates in a while
@@ -58,6 +63,7 @@ const getCurrentUsageStats = async (machineName) => {
 };
 
 export default {
+    getUniqueMachines,
     isMachineBusy,
     getLastUsed,
     getMachineRoom,

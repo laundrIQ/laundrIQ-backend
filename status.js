@@ -15,8 +15,7 @@ const init = (app, db) => {
     });
 
     app.get('/machines', async (req, res) => {
-        const machinesRes = await db.query('show tag values with key=machine');
-        const uniqueMachines = new Set(machinesRes.map(m => m.value));
+        const uniqueMachines = await usage.getUniqueMachines();
         const rooms = {};
         let response = {rooms: []};
         const promises = [];
