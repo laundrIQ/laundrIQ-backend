@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import webPush from "web-push";
 
 const settingsPath = path.resolve('./data/config.json');
 
@@ -17,12 +18,25 @@ const createSkeleton = () => {
             host: 'localhost',
             port: 8086,
             database: 'laundry',
-        }
+        },
+        vapid: webPush.generateVAPIDKeys()
     }, null, 2));
 };
 
 const loadSettings = () => {
-    return JSON.parse(fs.readFileSync(settingsPath));
+    let settings = JSON.parse(fs.readFileSync(settingsPath));
+    if (!settings.vapid) {
+        console.log("Settings file did not contain VAPID keys, generating...");
+        settings.vapid = webPush.generateVAPIDKeys();
+        fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+        console.log("Settings file saved with new VAPID keys.");
+    }
+    webPush.setVapidDetails(
+        'mailto:admin@kekt.us',
+        settings.vapid.publicKey,
+        settings.vapid.privateKey
+    );
+    return settings;
 };
 
 console.log("Loading settings...");
