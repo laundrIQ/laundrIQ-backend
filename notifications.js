@@ -14,7 +14,7 @@ const init = (app, db) => {
         if (req.body.machines.length === 0) {
             delete subscriptions[sub];
         }
-        else {
+        else if (sub !== 'null') {
             subscriptions[sub] = req.body.machines;
         }
 
@@ -29,12 +29,20 @@ setInterval(async () => {
             let room;
             for (let sub in subscriptions) {
                 let subMachines = subscriptions[sub];
+                sub = JSON.parse(sub);
                 if (subMachines.includes(m)) {
                     if (!room) room = await usage.getMachineRoom(m);
-                    webPush.sendNotification(JSON.parse(sub), JSON.stringify({
-                        name: m,
-                        room
-                    }));
+                    console.log("notifying", m, sub);
+                    try {
+                        await webPush.sendNotification(sub, JSON.stringify({
+                            name: m,
+                            room
+                        }));
+                        console.log("sent successfully.");
+                    }
+                    catch (e) {
+                        console.error(e);
+                    }
                     subMachines.splice(subMachines.indexOf(m), 1);
                     if (subMachines.length < 1) {
                         delete subscriptions[sub];
