@@ -12,6 +12,10 @@ const getUniqueMachines = async () => {
 
 const isMachineBusy = async (machineName) => {
     const result = await db.query(`SELECT moving_average("activity", 4) FROM "washing_activity" WHERE machine='${machineName}' ORDER BY DESC LIMIT 2`);
+    // there is literally no data
+    if (result.length < 1) {
+        return false;
+    }
     // machine is down and hasn't sent updates in a while
     if (moment().subtract(5, 'minute').isAfter(result[0].time)) {
         return false;
